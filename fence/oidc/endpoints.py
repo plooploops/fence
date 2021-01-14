@@ -1,12 +1,12 @@
 from authlib.oauth2.rfc6749.errors import InvalidClientError, OAuth2Error
 import authlib.oauth2.rfc7009
 import bcrypt
-import flask
+import flask  # noqa: F401
 
 from cdislogging import get_logger
 
 from fence.errors import BlacklistingError
-import fence.jwt.blacklist
+import fence.JWT.blacklist
 
 
 logger = get_logger(__name__)
@@ -31,7 +31,7 @@ class RevocationEndpoint(authlib.oauth2.rfc7009.RevocationEndpoint):
         Revoke a token.
         """
         try:
-            fence.jwt.blacklist.blacklist_encoded_token(token)
+            fence.JWT.blacklist.blacklist_encoded_token(token)
         except BlacklistingError as err:
             logger.info(
                 "Token provided for revocation is not valid. "

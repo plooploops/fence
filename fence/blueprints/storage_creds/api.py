@@ -5,7 +5,7 @@ from flask_restful import Resource
 
 from fence.auth import require_auth_header
 from fence.auth import current_token
-from fence.jwt.blacklist import blacklist_token
+from fence.JWT.blacklist import blacklist_token
 from fence.models import UserRefreshToken
 from fence.config import config
 

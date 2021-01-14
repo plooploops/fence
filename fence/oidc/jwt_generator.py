@@ -1,7 +1,7 @@
 import flask
 from flask_sqlalchemy_session import current_session
 
-from fence.jwt.token import (
+from fence.JWT.token import (
     AuthFlowTypes,
     generate_signed_access_token,
     generate_signed_id_token,
@@ -78,7 +78,7 @@ def generate_implicit_response(
     if not isinstance(scope, list):
         scope = scope.split(" ")
 
-    if not "user" in scope:
+    if "user" not in scope:
         scope.append("user")
 
     # ``expires_in`` is just the token expiration time.

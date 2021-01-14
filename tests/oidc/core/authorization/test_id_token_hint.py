@@ -23,7 +23,7 @@ import pytest
 
 from urllib.parse import urlparse, parse_qs
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 from tests.utils import oauth2
 from fence.config import config
 

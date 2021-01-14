@@ -4,7 +4,7 @@ Test the endpoints in the ``/oauth2`` blueprint.
 
 import pytest
 
-from fence.jwt.token import SCOPE_DESCRIPTION
+from fence.JWT.token import SCOPE_DESCRIPTION
 from fence.config import config
 
 

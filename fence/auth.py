@@ -1,10 +1,12 @@
 import flask
 from flask_sqlalchemy_session import current_session
 from functools import wraps
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 
-from authutils.errors import JWTError, JWTExpiredError
-from authutils.token.validate import (
+from authutils.errors import JWTError, JWTExpiredError  # noqa: F401
+from authutils.token.validate import (  # noqa: F401
     current_token,
     require_auth_header,
     set_current_token,
@@ -12,10 +14,10 @@ from authutils.token.validate import (
 )
 from cdislogging import get_logger
 
-from fence.errors import Unauthorized, InternalError
-from fence.jwt.validate import validate_jwt
+from fence.errors import Unauthorized, InternalError  # noqa: F401
+from fence.JWT.validate import validate_jwt
 from fence.models import User, IdentityProvider, query_for_user
-from fence.user import get_current_user
+from fence.user import get_current_user  # noqa: F401
 from fence.utils import clear_cookies
 from fence.config import config
 

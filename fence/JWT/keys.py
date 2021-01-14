@@ -11,10 +11,10 @@ Attributes:
         return default private key for the app
 """
 
-import datetime
+import datetime  # noqa: F401
 import os
 
-import base64
+import base64  # noqa: F401
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 import dateutil.parser
@@ -142,7 +142,7 @@ class Keypair(object):
             EnvironmentError: if the public or private key files are missing
         """
         if naming_function is None:
-            naming_function = lambda d: "fence_key_" + d
+            naming_function = lambda d: "fence_key_" + d  # noqa: E731
 
         pub_filepath = os.path.join(keys_dir, "jwt_public_key.pem")
         prv_filepath = os.path.join(keys_dir, "jwt_private_key.pem")

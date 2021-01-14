@@ -16,8 +16,8 @@ import jwt
 from sqlalchemy import BigInteger, Column, String
 
 from fence.errors import BlacklistingError
-from fence.jwt import keys
-from fence.jwt.errors import JWTError
+from fence.JWT import keys
+from fence.JWT.errors import JWTError
 from fence.models import Base, UserRefreshToken
 
 

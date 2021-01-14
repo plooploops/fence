@@ -1,14 +1,11 @@
 import time
-import flask
 from fence.resources.storage.cdis_jwt import create_session_token
-from fence.jwt.token import generate_signed_access_token
+from fence.JWT.token import generate_signed_access_token
 from fence.config import config
 from fence.models import User
 
-from fence.jwt.keys import default_public_key
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 
-from unittest.mock import MagicMock, patch, call
 
 import pytest
 

@@ -10,8 +10,15 @@ from cdispyutils.config import get_value
 from cdispyutils.hmac4 import generate_aws_presigned_url
 import flask
 import requests
+from datetime import datetime, timedelta
+from azure.storage.blob import (
+    BlobServiceClient,
+    ResourceTypes,
+    AccountSasPermissions,
+    generate_blob_sas,
+)
 
-from fence.auth import (
+from fence.auth import (  # noqa: F401
     get_jwt,
     has_oauth,
     current_token,
@@ -44,6 +51,7 @@ logger = get_logger(__name__)
 ACTION_DICT = {
     "s3": {"upload": "PUT", "download": "GET"},
     "gs": {"upload": "PUT", "download": "GET"},
+    "az": {"download": "GET"},
 }
 
 SUPPORTED_PROTOCOLS = ["s3", "http", "ftp", "https", "gs"]
@@ -217,7 +225,7 @@ class BlankIndex(object):
             key(str): object key or `GUID/filename`
             uploadId(str): upload id of the current upload
             parts(list(set)): List of part infos
-                [{"Etag": "1234567", "PartNumber": 1}, {"Etag": "4321234", "PartNumber": 2}]
+            [{"Etag": "1234567", "PartNumber": 1},{"Etag": "4321234", "PartNumber": 2}]
 
         Returns:
             None if success otherwise an exception
@@ -406,7 +414,7 @@ class IndexedFile(object):
             raise ValueError("index record missing `authz`")
 
         logger.debug(
-            f"authz check can user {action} on {self.index_document['authz']} for fence?"
+            f"authz check can user {action} on {self.index_document['authz']} for fence?"  # noqa: E501
         )
         return flask.current_app.arborist.auth_request(
             jwt=get_jwt(),
@@ -437,7 +445,7 @@ class IndexedFile(object):
             else:
                 username = flask.g.user.username
             logger.debug(
-                f"authz check using uploader field: {self.index_document.get('uploader')} == {username}"
+                f"authz check using uploader field: {self.index_document.get('uploader')} == {username}"  # noqa: E501
             )
             return self.index_document.get("uploader") == username
 
@@ -534,6 +542,8 @@ class IndexedFileLocation(object):
             return S3IndexedFileLocation(url)
         elif protocol == "gs":
             return GoogleStorageIndexedFileLocation(url)
+        elif (protocol == "https") and (".blob.core.windows.net/" in url):
+            return AzureBlobStorageIndexedFileLocation(url)
         return IndexedFileLocation(url)
 
     def get_signed_url(
@@ -783,7 +793,7 @@ class S3IndexedFileLocation(IndexedFileLocation):
         Args:
             uploadId(str): upload id of the current upload
             parts(list(set)): List of part infos
-                    [{"Etag": "1234567", "PartNumber": 1}, {"Etag": "4321234", "PartNumber": 2}]
+            [{"Etag": "1234567", "PartNumber": 1},{"Etag": "4321234", "PartNumber": 2}]
         """
         aws_creds = get_value(
             config, "AWS_CREDENTIALS", InternalError("credentials not configured")
@@ -956,6 +966,73 @@ class GoogleStorageIndexedFileLocation(IndexedFileLocation):
                 logger.error(exc)
                 status_code = 500
             return ("Failed to delete data file.", status_code)
+
+
+class AzureBlobStorageIndexedFileLocation(IndexedFileLocation):
+    """
+    An indexed file that lives in a Azure blob storage conatiner.
+    """
+
+    def _create_sas_query(
+        self, conn_str, container_name, blob_name, expires_in_seconds
+    ):
+        blob_service_client = BlobServiceClient.from_connection_string(conn_str)
+
+        sas_query = generate_blob_sas(
+            blob_service_client.account_name,
+            container_name,
+            blob_name,
+            account_key=blob_service_client.credential.account_key,
+            resource_types=ResourceTypes(object=True),
+            permission=AccountSasPermissions(read=True),
+            expiry=datetime.utcnow() + timedelta(seconds=expires_in_seconds),
+        )
+        return sas_query
+
+    def _generate_azure_blob_storage_sas(
+        self,
+        http_verb,
+        container_and_blob,
+        expires_in,
+        azure_creds,
+        user_id,
+        username,
+        r_pays_project=None,
+    ):
+        sas_query = self._create_sas_query(
+            azure_creds, container_and_blob[0], container_and_blob[1], expires_in
+        )
+        sas_url = self.url + "?" + sas_query
+        return sas_url
+
+    def get_signed_url(
+        self,
+        action,
+        expires_in,
+        public_data=False,
+        force_signed_url=True,
+        r_pays_project=None,
+    ):
+        azure_creds = get_value(
+            config,
+            "AZ_BLOB_CREDENTIALS",
+            InternalError("Azure Blob credentials not configured"),
+        )
+
+        container_and_blob = self.parsed_url.path.strip("/").split("/")
+
+        user_info = _get_user_info()
+        url = self._generate_azure_blob_storage_sas(
+            ACTION_DICT["az"][action],
+            container_and_blob,
+            expires_in,
+            azure_creds,
+            user_info.get("user_id"),
+            user_info.get("username"),
+            r_pays_project=r_pays_project,
+        )
+
+        return url
 
 
 def _get_user_info():

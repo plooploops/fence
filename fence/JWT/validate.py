@@ -1,14 +1,14 @@
 import authutils.errors
 import authutils.token.keys
 import authutils.token.validate
-import flask
+import flask  # noqa: F401
 import jwt
 
 from fence.config import config
 from fence.errors import Unauthorized
-from fence.jwt.blacklist import is_blacklisted
-from fence.jwt.errors import JWTError, JWTPurposeError
-from fence.jwt.utils import get_jwt_header
+from fence.JWT.blacklist import is_blacklisted
+from fence.JWT.errors import JWTError, JWTPurposeError
+from fence.JWT.utils import get_jwt_header
 
 
 def validate_purpose(claims, pur):

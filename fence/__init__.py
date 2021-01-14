@@ -11,7 +11,7 @@ from fence.auth import logout, build_redirect_url
 from fence.blueprints.data.indexd import S3IndexedFileLocation
 from fence.blueprints.login.utils import allowed_login_redirects, domain
 from fence.errors import UserError
-from fence.jwt import keys
+from fence.JWT import keys
 from fence.models import migrate
 from fence.oidc.client import query_client
 from fence.oidc.server import server
@@ -43,8 +43,6 @@ import fence.blueprints.google
 import fence.blueprints.privacy
 
 from cdislogging import get_logger
-
-from cdispyutils.config import get_value
 
 from gen3authz.client.arborist.client import ArboristClient
 
@@ -179,7 +177,8 @@ def app_register_blueprints(app):
 def _check_s3_buckets(app):
     """
     Function to ensure that all s3_buckets have a valid credential.
-    Additionally, if there is no region it will produce a warning then try to fetch and cache the region.
+    Additionally, if there is no region it will produce a warning and
+    then try to fetch and cache the region.
     """
     buckets = config.get("S3_BUCKETS") or {}
     aws_creds = config.get("AWS_CREDENTIALS") or {}
@@ -199,7 +198,7 @@ def _check_s3_buckets(app):
 
         if cred not in aws_creds:
             raise ValueError(
-                "Credential {} for S3_BUCKET {} is not defined in AWS_CREDENTIALS".format(
+                "Credential {} for S3_BUCKET {} is not defined in AWS_CREDENTIALS".format(  # noqa: E501
                     cred, bucket_name
                 )
             )
@@ -209,7 +208,7 @@ def _check_s3_buckets(app):
         if not region and not bucket_details.get("endpoint_url"):
             logger.warning(
                 "WARNING: no region for S3_BUCKET: {}. Providing the region will reduce"
-                " response time and avoid a call to GetBucketLocation which you make lack the AWS ACLs for.".format(
+                " response time and avoid a call to GetBucketLocation which you make lack the AWS ACLs for.".format(  # noqa: E501
                     bucket_name
                 )
             )
@@ -256,7 +255,8 @@ def app_config(
         file_name=file_name,
     )
 
-    # load all config back into flask app config for now, we should PREFER getting config
+    # load all config back into flask app config for now,
+    # we should PREFER getting config
     # directly from the fence config singleton in the code though.
     app.config.update(**config._configs)
 
@@ -269,11 +269,13 @@ def app_config(
 
     app.debug = config["DEBUG"]
     # Following will update logger level, propagate, and handlers
-    get_logger(__name__, log_level="debug" if config["DEBUG"] == True else "info")
+    get_logger(__name__, log_level="debug" if config["DEBUG"] is True else "info")
 
     _setup_oidc_clients(app)
 
     _check_s3_buckets(app)
+
+    # _check_azure_storage(app) # TODO: have some inital checking
 
 
 def _setup_data_endpoint_and_boto(app):

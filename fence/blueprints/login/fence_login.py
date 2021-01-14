@@ -5,7 +5,7 @@ from flask_restful import Resource
 from fence.auth import login_user
 from fence.blueprints.login.redirect import validate_redirect
 from fence.errors import Unauthorized
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 from fence.models import IdentityProvider
 
 

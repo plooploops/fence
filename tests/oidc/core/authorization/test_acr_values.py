@@ -11,7 +11,7 @@ OIDC specification of authentication request parameter ``acr_values``:
 """
 import pytest
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 
 from tests.utils import oauth2
 

@@ -15,7 +15,6 @@ from userdatamodel.models import (
     AccessPrivilege,
     Bucket,
     CloudProvider,
-    GoogleProxyGroup,
     Group,
     IdentityProvider,
     Project,
@@ -29,10 +28,9 @@ from fence.blueprints.link import (
     add_new_user_google_account,
 )
 from fence.errors import Unauthorized
-from fence.jwt.token import (
+from fence.JWT.token import (
     generate_signed_access_token,
     generate_signed_refresh_token,
-    issued_and_expiration_times,
 )
 from fence.models import (
     Client,
@@ -127,7 +125,8 @@ def create_client_action(
             "\nSave these credentials! Fence will not save the unhashed client secret."
         )
         print("client id, client secret:")
-        # This should always be the last line of output and should remain in this format--
+        # This should always be the last line of output
+        # and should remain in this format--
         # cloud-auto and gen3-qa use the output programmatically.
         print(
             create_client(
@@ -683,7 +682,7 @@ def delete_expired_service_accounts(DB):
                         )
                     except Exception as e:
                         logger.error(
-                            "ERROR: Could not delete service account {}. Details: {}".format(
+                            "ERROR: Could not delete service account {}. Details: {}".format(  # noqa: E501
                                 record.service_account.email, e
                             )
                         )
@@ -767,7 +766,7 @@ def _verify_google_group_member(session, access_group, member):
                 )
         except Exception as e:
             logger.error(
-                "ERROR: Could not remove google group memeber {} from access group {}. Detail {}".format(
+                "ERROR: Could not remove google group memeber {} from access group {}. Detail {}".format(  # noqa: E501
                     member.get("email"), access_group.email, e
                 )
             )
@@ -808,7 +807,7 @@ def _verify_google_service_account_member(session, access_group, member):
                 )
         except Exception as e:
             logger.error(
-                "ERROR: Could not remove service account memeber {} from access group {}. Detail {}".format(
+                "ERROR: Could not remove service account memeber {} from access group {}. Detail {}".format(  # noqa: E501
                     member.get("email"), access_group.email, e
                 )
             )
@@ -1345,7 +1344,7 @@ def link_external_bucket(db, name):
             email = access_group.email
 
             logger.warning(
-                f"bucket already exists with name: {name}, using existing group email: {email}"
+                f"bucket already exists with name: {name}, using existing group email: {email}"  # noqa: E501
             )
 
             return email

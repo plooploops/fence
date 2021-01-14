@@ -3,11 +3,10 @@
 import argparse
 import os
 import sys
-import logging
 
 from cdislogging import get_logger
 
-from fence.jwt import keys
+from fence.JWT import keys
 from fence.config import config
 from fence.scripting.fence_create import (
     JWTCreator,
@@ -136,7 +135,7 @@ def parse_arguments():
         nargs="*",
     )
 
-    client_list = subparsers.add_parser("client-list")
+    subparsers.add_parser("client-list")
 
     client_delete = subparsers.add_parser("client-delete")
     client_delete.add_argument("--client", required=True)
@@ -268,12 +267,10 @@ def parse_arguments():
         "If not given, will attempt to determine from provided credentials.",
     )
 
-    manage_google_keys = subparsers.add_parser("google-manage-keys")
-    init_google = subparsers.add_parser("google-init")
-    manage_user_registrations = subparsers.add_parser(
-        "google-manage-user-registrations"
-    )
-    manage_google_accounts = subparsers.add_parser("google-manage-account-access")
+    subparsers.add_parser("google-manage-keys")
+    subparsers.add_parser("google-init")
+    subparsers.add_parser("google-manage-user-registrations")
+    subparsers.add_parser("google-manage-account-access")
 
     token_create = subparsers.add_parser("token-create")
     token_create.add_argument("--kid", help="key ID to use for signing tokens")
@@ -307,7 +304,7 @@ def parse_arguments():
     force_link_google.add_argument(
         "--expires_in",
         required=False,
-        help="The time (in seconds) during which the Google account has bucket access (7 days max/default)",
+        help="The time (in seconds) during which the Google account has bucket access (7 days max/default)",  # noqa: E501
     )
 
     notify_problem_users = subparsers.add_parser("notify-problem-users")
@@ -336,7 +333,7 @@ def parse_arguments():
     subparsers.add_parser(
         "google-list-authz-groups",
         help="List the Google Buckets "
-        "Fence is providing access to. Includes Fence Project.auth_id and Google Bucket "
+        "Fence is providing access to. Includes Fence Project.auth_id and Google Bucket "  # noqa: E501
         "Access Group",
     )
 

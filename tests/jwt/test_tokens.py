@@ -1,12 +1,8 @@
-import pytest
-import random
-import string
 import jwt
 
 from tests.utils import iat_and_exp
 
-from fence.jwt.token import generate_signed_access_token, generate_signed_session_token
-from fence.jwt.errors import JWTSizeError
+from fence.JWT.token import generate_signed_access_token
 
 
 def test_passport_access_token(app, kid, rsa_private_key, test_user_a):

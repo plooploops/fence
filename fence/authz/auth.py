@@ -2,8 +2,8 @@ from functools import wraps
 
 import flask
 
-from fence.errors import Forbidden, Unauthorized
-from fence.jwt.utils import get_jwt_header
+from fence.errors import Forbidden
+from fence.JWT.utils import get_jwt_header
 
 
 def check_arborist_auth(resource, method, constraints=None):

@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-from fence.jwt.keys import load_keypairs
 from fence.config import config
 
 

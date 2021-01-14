@@ -22,7 +22,7 @@ OIDC spec for successful refresh response:
       time of the original authentication.
 """
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 
 
 def test_same_claims(oauth_test_client, token_response_json):

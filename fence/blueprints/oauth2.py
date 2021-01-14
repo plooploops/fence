@@ -24,8 +24,8 @@ from authutils.errors import JWTExpiredError
 
 from fence.blueprints.login import IDP_URL_MAP
 from fence.errors import Unauthorized, UserError
-from fence.jwt.errors import JWTError
-from fence.jwt.token import SCOPE_DESCRIPTION
+from fence.JWT.errors import JWTError
+from fence.JWT.token import SCOPE_DESCRIPTION
 from fence.models import Client
 from fence.oidc.endpoints import RevocationEndpoint
 from fence.oidc.server import server
@@ -297,7 +297,7 @@ def get_token(*args, **kwargs):
         response = server.create_token_response()
     except (JWTError, JWTExpiredError) as e:
         # - in Authlib 0.11, create_token_response does not raise OAuth2Error
-        # - fence.jwt.errors.JWTError: blacklisted refresh token
+        # - fence.JWT.errors.JWTError: blacklisted refresh token
         # - JWTExpiredError (cdiserrors.AuthNError subclass): expired
         #   refresh token
         # Returns code 400 per OAuth2 spec

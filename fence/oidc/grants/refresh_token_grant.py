@@ -9,7 +9,7 @@ from authlib.oauth2.rfc6749.grants import RefreshTokenGrant as AuthlibRefreshTok
 from authlib.oauth2.rfc6749.util import scope_to_list
 from cdislogging import get_logger
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 from fence.models import ClientAuthType, User
 
 logger = get_logger(__name__)

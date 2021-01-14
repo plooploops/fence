@@ -3,9 +3,9 @@ from authutils.oauth2.client import OAuthClient
 from collections import OrderedDict
 import pytest
 
-import fence
+import fence  # noqa: F401
 from fence.config import config
-from fence.jwt.keys import Keypair
+from fence.JWT.keys import Keypair
 
 
 @pytest.fixture(scope="function")

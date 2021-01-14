@@ -2,9 +2,9 @@ import flask
 
 from fence.auth import get_user_from_claims
 from fence.errors import Unauthorized
-from fence.jwt import token
-from fence.jwt.errors import JWTError
-from fence.jwt.validate import validate_jwt
+from fence.JWT import token
+from fence.JWT.errors import JWTError
+from fence.JWT.validate import validate_jwt
 from fence.models import UserRefreshToken
 
 

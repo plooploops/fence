@@ -13,7 +13,7 @@ import os
 import copy
 
 from addict import Dict
-from authutils.testing.fixtures import (
+from authutils.testing.fixtures import (  # noqa: F401
     _hazmat_rsa_private_key,
     _hazmat_rsa_private_key_2,
     rsa_private_key,
@@ -35,7 +35,7 @@ from sqlalchemy.schema import DropTable
 import fence
 from fence import app_init
 from fence import models
-from fence.jwt.keys import Keypair
+from fence.JWT.keys import Keypair
 from fence.config import config
 from fence.errors import NotFound
 
@@ -78,7 +78,7 @@ def claims_refresh():
 
 
 @pytest.fixture(scope="session")
-def encoded_jwt(kid, rsa_private_key):
+def encoded_jwt(kid, rsa_private_key):  # noqa: F811
     """
     Return an example JWT containing the claims and encoded with the private
     key.
@@ -94,7 +94,7 @@ def encoded_jwt(kid, rsa_private_key):
 
 
 @pytest.fixture(scope="session")
-def encoded_jwt_expired(kid, rsa_private_key):
+def encoded_jwt_expired(kid, rsa_private_key):  # noqa: F811
     """
     Return an example JWT that has already expired.
     Args:
@@ -113,7 +113,7 @@ def encoded_jwt_expired(kid, rsa_private_key):
 
 
 @pytest.fixture(scope="session")
-def encoded_jwt_refresh_token(claims_refresh, kid, rsa_private_key):
+def encoded_jwt_refresh_token(claims_refresh, kid, rsa_private_key):  # noqa: F811
     """
     Return an example JWT refresh token containing the claims and encoded with
     the private key.
@@ -225,7 +225,7 @@ def mock_arborist_requests(request):
 
 
 @pytest.fixture(scope="session")
-def app(kid, rsa_private_key, rsa_public_key):
+def app(kid, rsa_private_key, rsa_public_key):  # noqa: F811
     """
     Flask application fixture.
     """
@@ -471,6 +471,20 @@ def indexd_client(app, request):
             "created_date": "",
             "updated_date": "",
         }
+    elif request.param == "https_azure":
+        record = {
+            "did": "",
+            "baseid": "",
+            "rev": "",
+            "size": 10,
+            "file_name": "file2",
+            "urls": ["https://fakeaccount.blob.core.windows.net/container5/blob6"],
+            "hashes": {},
+            "acl": ["phs000178", "phs000218"],
+            "form": "",
+            "created_date": "",
+            "updated_date": "",
+        }
     elif request.param == "nonexistent_guid":
         # throw an error when requested to simulate the GUID not existing
         # TODO (rudyardrichter, 2018-11-03): consolidate things needing to do this patch
@@ -506,6 +520,28 @@ def indexd_client(app, request):
             "updated_date": "",
         }
 
+    class FakeAzureCrendential(object):
+        def __init__(self):
+            self.account_key = "FakefakeAccountKey"
+
+    class FakeBlobServiceClient(object):
+        def __init__(self):
+            self.account_name = "fakeAccountName"
+            self.credential = FakeAzureCrendential()
+
+        @classmethod
+        def from_connection_string(cls, conn_str, credential=None, **kwargs):
+            return FakeBlobServiceClient()
+
+    mock_blob_client_patcher = patch(
+        "fence.blueprints.data.indexd.BlobServiceClient",
+        return_value=FakeBlobServiceClient(),
+    )
+    mock_generate_blob_sas_patcher = patch(
+        "fence.blueprints.data.indexd.generate_blob_sas",
+        return_value="FAKE_SharedAccessSignature_STRING",
+    )
+
     # TODO (rudyardrichter, 2018-11-03): consolidate things needing to do this patch
     indexd_patcher = patch(
         "fence.blueprints.data.indexd.IndexedFile.index_document", record
@@ -515,6 +551,8 @@ def indexd_client(app, request):
     )
     mocker.add_mock(indexd_patcher)
     mocker.add_mock(blank_patcher)
+    mocker.add_mock(mock_blob_client_patcher)
+    mocker.add_mock(mock_generate_blob_sas_patcher)
 
     output = {
         "mocker": mocker,
@@ -529,7 +567,7 @@ def indexd_client(app, request):
 
 @pytest.fixture(scope="function")
 def indexd_client_with_arborist(app, request):
-    record = {}
+    record = {}  # noqa: F841
 
     def do_patch(authz):
         if request.param == "gs":
@@ -1040,7 +1078,7 @@ def cloud_manager():
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://accounts.google.com/o/oauth2/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/...<api-name>api%40project-id.iam.gserviceaccount.com",
+        "client_x509_cert_url": "https://www.googleapis.com/...<api-name>api%40project-id.iam.gserviceaccount.com",  # noqa: E501
     }
     return manager
 
@@ -1098,7 +1136,7 @@ def mock_get(monkeypatch, example_keys_response):
 
 @pytest.fixture(scope="function")
 def encoded_creds_jwt(
-    kid, rsa_private_key, user_client, oauth_client, google_proxy_group
+    kid, rsa_private_key, user_client, oauth_client, google_proxy_group  # noqa: F811
 ):
     """
     Return a JWT and user_id for a new user containing the claims and
@@ -1130,7 +1168,9 @@ def encoded_creds_jwt(
 
 
 @pytest.fixture(scope="function")
-def encoded_jwt_no_proxy_group(kid, rsa_private_key, user_client, oauth_client):
+def encoded_jwt_no_proxy_group(
+    kid, rsa_private_key, user_client, oauth_client  # noqa: F811
+):
     """
     Return a JWT and user_id for a new user containing the claims and
     encoded with the private key.

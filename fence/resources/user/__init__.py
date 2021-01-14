@@ -15,11 +15,11 @@ from fence.resources.google.utils import (
     get_linked_google_account_exp,
     get_service_account,
 )
-from fence.resources.userdatamodel import get_user_groups
+from fence.resources.userdatamodel import get_user_groups  # noqa: F401
 
 from fence.config import config
 from fence.errors import NotFound, Unauthorized, UserError, InternalError
-from fence.jwt.utils import get_jwt_header
+from fence.JWT.utils import get_jwt_header
 from fence.models import query_for_user
 
 
@@ -134,14 +134,16 @@ def get_user_info(current_session, username):
     try:
         encoded_access_token = flask.g.access_token or get_jwt_header()
     except Unauthorized:
-        # This only happens if a session token was present (since login_required did not throw an error)
+        # This only happens if a session token was present
+        # (since login_required did not throw an error)
         # but for some reason there was no access token in flask.g.access_token.
         # (Perhaps it was manually deleted by the user.)
-        # In particular, a curl request made with no tokens shouldn't get here (bc of login_required).
+        # In particular, a curl request made with no tokens
+        # shouldn't get here (bc of login_required).
         # So the request is probably from a browser.
         logger.warning(
             "Session token present but no access token found. "
-            "Unable to check scopes in userinfo; some claims may not be included in response."
+            "Unable to check scopes in userinfo; some claims may not be included in response."  # noqa: E501
         )
         encoded_access_token = None
 

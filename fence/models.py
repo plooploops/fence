@@ -28,10 +28,10 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from sqlalchemy import exc as sa_exc
-from sqlalchemy import func
+from sqlalchemy import func  # noqa: F811
 from sqlalchemy.schema import ForeignKey
 from userdatamodel import Base
-from userdatamodel.models import (
+from userdatamodel.models import (  # noqa: F401
     AccessPrivilege,
     Application,
     AuthorizationProvider,
@@ -56,6 +56,9 @@ from userdatamodel.models import (
 import warnings
 
 from fence.config import config
+from cdislogging import get_logger
+
+logger = get_logger(__name__, log_level="debug")
 
 
 def query_for_user(session, username):
@@ -584,29 +587,36 @@ to_timestamp = (
 def migrate(driver):
     if not driver.engine.dialect.supports_alter:
         print(
-            "This engine dialect doesn't support altering so we are not migrating even if necessary!"
+            "This engine dialect doesn't support altering so we are not migrating even if necessary!"  # noqa: E501
         )
         return
 
+    logger.info("Starting migration: " + str(driver))
     md = MetaData()
+    logger.info("Starting migration and created metadata: " + str(md))
 
+    logger.info(
+        "Starting migration and creating table: " + str(UserRefreshToken.__tablename__)
+    )
     table = Table(
         UserRefreshToken.__tablename__, md, autoload=True, autoload_with=driver.engine
     )
+    logger.info("Starting migration and created table: " + str(table))
     if str(table.c.expires.type) != "BIGINT":
         print("Altering table %s expires to BIGINT" % (UserRefreshToken.__tablename__))
         with driver.session as session:
             session.execute(to_timestamp)
         with driver.session as session:
             session.execute(
-                "ALTER TABLE {} ALTER COLUMN expires TYPE BIGINT USING pc_datetime_to_timestamp(expires);".format(
+                "ALTER TABLE {} ALTER COLUMN expires TYPE BIGINT USING pc_datetime_to_timestamp(expires);".format(  # noqa: E501
                     UserRefreshToken.__tablename__
                 )
             )
 
     # username limit migration
-
+    logger.info("Starting migration and creating table: " + str(User.__tablename__))
     table = Table(User.__tablename__, md, autoload=True, autoload_with=driver.engine)
+    logger.info("Starting migration and created table: " + str(table))
     if str(table.c.username.type) != str(User.username.type):
         print(
             "Altering table %s column username type to %s"
@@ -620,8 +630,9 @@ def migrate(driver):
             )
 
     # oidc migration
-
+    logger.info("Starting migration and creating table: " + str(Client.__tablename__))
     table = Table(Client.__tablename__, md, autoload=True, autoload_with=driver.engine)
+    logger.info("Starting migration and created table: " + str(table))
     if not ("ix_name" in [constraint.name for constraint in table.constraints]):
         with driver.session as session:
             session.execute(
@@ -725,9 +736,10 @@ def migrate(driver):
             _set_on_delete_cascades(driver, delete_user_session, md)
 
             delete_user_session.commit()
-        except:
+        except Exception as e:
             delete_user_session.rollback()
-            raise
+            print(e)
+            raise e
         finally:
             delete_user_session.close()
 
@@ -943,7 +955,7 @@ def set_foreign_key_constraint_on_delete(
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore",
-            message="Predicate of partial index \S+ ignored during reflection",
+            message="Predicate of partial index \S+ ignored during reflection",  # noqa: W605
             category=sa_exc.SAWarning,
         )
         table = Table(table_name, metadata, autoload=True, autoload_with=driver.engine)
@@ -952,7 +964,7 @@ def set_foreign_key_constraint_on_delete(
     if column_name in table.c:
         session.execute(
             'ALTER TABLE ONLY "{}" DROP CONSTRAINT IF EXISTS {}, '
-            'ADD CONSTRAINT {} FOREIGN KEY ({}) REFERENCES "{}" ({}) ON DELETE {};'.format(
+            'ADD CONSTRAINT {} FOREIGN KEY ({}) REFERENCES "{}" ({}) ON DELETE {};'.format(  # noqa: E501
                 table_name,
                 foreign_key_name,
                 foreign_key_name,
@@ -1127,7 +1139,7 @@ def _update_for_authlib(driver, md):
         Column("software_id", String(36)),
         Column("software_version", String(48)),
     ]
-    add_client_col = lambda col: add_column_if_not_exist(
+    add_client_col = lambda col: add_column_if_not_exist(  # noqa: E731
         Client.__tablename__, column=col, driver=driver, metadata=md
     )
     list(map(add_client_col, CLIENT_COLUMNS_TO_ADD))
@@ -1144,7 +1156,7 @@ def _update_for_authlib(driver, md):
                 client.grant_type = "authorization_code\nrefresh_token"
         session.commit()
 
-    add_code_col = lambda col: add_column_if_not_exist(
+    add_code_col = lambda col: add_column_if_not_exist(  # noqa: E731
         AuthorizationCode.__tablename__, column=col, driver=driver, metadata=md
     )
     list(map(add_code_col, CODE_COLUMNS_TO_ADD))
@@ -1166,7 +1178,7 @@ def _update_for_authlib(driver, md):
     # add auth_time column
     if "{}.auth_time".format(tablename) not in auth_code_columns:
         with driver.session as session:
-            command = "ALTER TABLE {} ADD COLUMN auth_time Integer NOT NULL DEFAULT extract(epoch from now());".format(
+            command = "ALTER TABLE {} ADD COLUMN auth_time Integer NOT NULL DEFAULT extract(epoch from now());".format(  # noqa: E501
                 tablename
             )
             session.execute(command)
@@ -1178,7 +1190,7 @@ def _update_for_authlib(driver, md):
         )
         session.commit()
         session.execute(
-            "ALTER TABLE {} ALTER COLUMN auth_time SET DEFAULT extract(epoch from now());".format(
+            "ALTER TABLE {} ALTER COLUMN auth_time SET DEFAULT extract(epoch from now());".format(  # noqa: E501
                 tablename
             )
         )

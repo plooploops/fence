@@ -10,7 +10,7 @@ OIDC specification of authentication request parameter ``max_age``:
     auth_time Claim Value.
 """
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 
 
 def test_reauthenticate_end_user(oauth_test_client):
@@ -19,6 +19,8 @@ def test_reauthenticate_end_user(oauth_test_client):
     # TODO
 
     response = oauth_test_client.authorize(data=data)
+    assert response.response.status_code == 200
+    assert len(response.code) > 0
 
 
 def test_id_token_contains_auth_time(oauth_test_client):

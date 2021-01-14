@@ -1,4 +1,4 @@
-from fence.jwt.blacklist import is_token_blacklisted
+from fence.JWT.blacklist import is_token_blacklisted
 
 from tests.utils.oauth2 import create_basic_header_for_client
 
@@ -20,7 +20,8 @@ def test_blacklisted_token(client, oauth_client, encoded_jwt_refresh_token):
 
 def test_cannot_revoke_access_token(client, oauth_client, encoded_jwt):
     """
-    Test that attempting to revoke an access token fails and return a 200 (per RFC 7009).
+    Test that attempting to revoke an access token fails
+    and return a 200 (per RFC 7009).
     """
     headers = create_basic_header_for_client(oauth_client)
     data = {"token": encoded_jwt}

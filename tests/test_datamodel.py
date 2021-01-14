@@ -8,6 +8,9 @@ from fence.models import (
 )
 from userdatamodel.user import Bucket, Project
 from fence.utils import random_str
+from cdislogging import get_logger
+
+logger = get_logger(__name__, log_level="debug")
 
 
 def test_user_delete_cascade(db_session):
@@ -27,6 +30,8 @@ def test_user_delete_cascade(db_session):
     assert len(user.clients) == 1
     db_session.delete(user)
     assert db_session.query(Client).filter_by(client_id=client.client_id).count() == 0
+    logger.info("Added user and deleted user")
+    logger.info(str(db_session))
 
 
 def test_service_account_relationships(db_session):

@@ -1,14 +1,14 @@
-import pytest
-import time
+import pytest  # noqa: F401
+import time  # noqa: F401
 
-from authlib.jose.errors import InvalidClaimError
+from authlib.jose.errors import InvalidClaimError  # noqa: F401
 
-from fence.jwt.token import (
+from fence.JWT.token import (
     generate_signed_id_token,
     UnsignedCodeIDToken,
     UnsignedIDToken,
 )
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 from fence.models import User
 from fence.utils import random_str
 from fence.config import config

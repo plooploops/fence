@@ -32,10 +32,10 @@ import flask
 from flask.sessions import SessionInterface, SessionMixin
 
 from fence.errors import Unauthorized
-from fence.jwt.keys import default_public_key
-from fence.jwt.token import generate_signed_access_token, generate_signed_session_token
-from fence.jwt.validate import validate_jwt
-from fence.jwt.validate import JWTError
+from fence.JWT.keys import default_public_key
+from fence.JWT.token import generate_signed_access_token, generate_signed_session_token
+from fence.JWT.validate import validate_jwt
+from fence.JWT.validate import JWTError
 from fence.resources.storage.cdis_jwt import create_session_token
 from fence.user import get_current_user
 from fence.resources.google.utils import get_linked_google_account_email
@@ -253,7 +253,7 @@ def _get_valid_access_token(app, session, request):
 
     try:
         valid_access_token = validate_jwt(access_token, purpose="access")
-    except Exception as exc:
+    except Exception as exc:  # noqa: F841
         return None
 
     # try to get user, exception means they're not logged in

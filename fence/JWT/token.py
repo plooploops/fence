@@ -8,11 +8,11 @@ from authlib.oidc.core import IDToken, CodeIDToken, ImplicitIDToken
 from authlib.oidc.core.util import create_half_hash
 
 from cdislogging import get_logger
-import flask
+import flask  # noqa: F401
 import jwt
 
-from fence.jwt import keys
-from fence.jwt.errors import JWTSizeError
+from fence.JWT import keys
+from fence.JWT.errors import JWTSizeError
 from fence.config import config
 
 logger = get_logger(__name__)
@@ -20,12 +20,12 @@ logger = get_logger(__name__)
 
 SCOPE_DESCRIPTION = {
     "openid": "default scope",
-    "user": "Know your {idp_names} basic account information and what you are authorized to access.",
-    "data": "Retrieve controlled-access datasets to which you have access on your behalf.",
+    "user": "Know your {idp_names} basic account information and what you are authorized to access.",  # noqa: E501
+    "data": "Retrieve controlled-access datasets to which you have access on your behalf.",  # noqa: E501
     "credentials": "View and update your credentials.",
-    "google_link": "Allow providing your personal Google account access to data on Google.",
-    "google_credentials": "Receive temporary Google credentials to access data on Google.",
-    "google_service_account": "Allow registration of external Google service accounts to access data.",
+    "google_link": "Allow providing your personal Google account access to data on Google.",  # noqa: E501
+    "google_credentials": "Receive temporary Google credentials to access data on Google.",  # noqa: E501
+    "google_service_account": "Allow registration of external Google service accounts to access data.",  # noqa: E501
     "admin": "View and update user authorizations.",
     "ga4gh_passport_v1": "Retrieve GA4GH Passports and Visas",
 }
@@ -415,11 +415,11 @@ def generate_signed_access_token(
         else:
             # truncate to configured number of projects in token
             projects = dict(user.project_access)
-            for key in list(projects)[config["TOKEN_PROJECTS_CUTOFF"] :]:
+            for key in list(projects)[config["TOKEN_PROJECTS_CUTOFF"] :]:  # noqa: E203
                 del projects[key]
             claims["context"]["user"]["projects"] = projects
             logger.warning(
-                "NOT including project_access = {} in claims for user {} because there are too many projects for the token\n".format(
+                "NOT including project_access = {} in claims for user {} because there are too many projects for the token\n".format(  # noqa: E501
                     {
                         k: dict(user.project_access)[k]
                         for k in set(dict(user.project_access)) - set(projects)
@@ -562,7 +562,7 @@ def generate_id_token(
     else:
         if auth_flow_type != AuthFlowTypes.CODE:
             logger.error(
-                "Invalid auth_flow_type passed to generate_id_token. Assuming code flow."
+                "Invalid auth_flow_type passed to generate_id_token. Assuming code flow."  # noqa: E501
             )
         token = UnsignedCodeIDToken(
             claims,

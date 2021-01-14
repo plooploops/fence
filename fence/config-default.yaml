@@ -30,6 +30,7 @@ BASE_URL: 'http://localhost/user'
 #     postgresql://[user[:password]@][netloc][:port][/dbname]
 DB: 'postgresql://test:test@localhost:5432/fence'
 
+
 # A URL-safe base64-encoded 32-byte key for encrypting keys in db
 # in python you can use the following script to generate one:
 #     import base64
@@ -574,6 +575,15 @@ INDEXD_PASSWORD: ''
 
 # url where authz microservice is running
 ARBORIST: null
+
+# //////////////////////////////////////////////////////////////////////////////////////
+# AZURE STORAGE BLOB CONFIGURATION
+#   - Support Azure Blob Data Access Methods
+# //////////////////////////////////////////////////////////////////////////////////////
+# Expects a connection string. 
+# See https://docs.microsoft.com/en-gb/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account
+AZ_BLOB_CREDENTIALS: ''
+
 
 # //////////////////////////////////////////////////////////////////////////////////////
 # CLOUD API LIBRARY (CIRRUS) AND GOOGLE CONFIGURATION

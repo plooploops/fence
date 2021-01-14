@@ -2,7 +2,7 @@
 Test just the actual return value from the token endpoint.
 """
 
-from fence.jwt.validate import validate_jwt
+from fence.JWT.validate import validate_jwt
 
 
 def test_token_response(token_response):

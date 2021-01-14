@@ -9,18 +9,16 @@ import requests
 
 import fence.blueprints.data.indexd
 from fence.config import config
-from fence.errors import NotSupported
 
 from tests import utils
 
-from unittest.mock import MagicMock, patch
-
-import cirrus
-from cirrus import GoogleCloudManager
+from unittest.mock import MagicMock
 
 
 @pytest.mark.parametrize(
-    "indexd_client", ["gs", "s3", "gs_acl", "s3_acl", "s3_external"], indirect=True
+    "indexd_client",
+    ["gs", "s3", "gs_acl", "s3_acl", "s3_external", "https_azure"],
+    indirect=True,
 )
 def test_indexd_download_file(
     client,
@@ -563,7 +561,7 @@ def test_blank_index_upload(app, client, auth_client, encoded_creds_jwt, user_cl
     arborist_requests_mocker = mock.patch(
         "gen3authz.client.arborist.client.requests.request", new_callable=mock.Mock
     )
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         data_requests.post.return_value = MockResponse(
             {
                 "did": str(uuid.uuid4()),
@@ -616,7 +614,7 @@ def test_blank_index_upload_authz(
     arborist_requests_mocker = mock.patch(
         "gen3authz.client.arborist.client.requests.request", new_callable=mock.Mock
     )
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         data_requests.post.return_value = MockResponse(
             {
                 "did": str(uuid.uuid4()),
@@ -637,7 +635,10 @@ def test_blank_index_upload_authz(
         response = client.post("/data/upload", headers=headers, data=data)
         indexd_url = app.config.get("INDEXD") or app.config.get("BASE_URL") + "/index"
         endpoint = indexd_url + "/index/blank/"
-        indexd_auth = (config["INDEXD_USERNAME"], config["INDEXD_PASSWORD"])
+        indexd_auth = (  # noqa: F841
+            config["INDEXD_USERNAME"],
+            config["INDEXD_PASSWORD"],
+        )
         data_requests.post.assert_called_once_with(
             endpoint,
             auth=None,
@@ -960,7 +961,7 @@ def test_delete_file_locations_by_uploader(
     mock_delete = mock.MagicMock(requests.put, return_value=mock_delete_response)
     with mock.patch(
         "fence.blueprints.data.indexd.requests.delete", mock_delete
-    ), arborist_requests_mocker as arborist_requests, mock_gcm as mock_gcm_2:
+    ), arborist_requests_mocker as arborist_requests, mock_gcm as mock_gcm_2:  # noqa: F841, E501
         arborist_requests.request.return_value = MockResponse({"auth": True})
         arborist_requests.request.return_value.status_code = 200
         headers = {"Authorization": "Bearer " + encoded_creds_jwt.jwt}
@@ -990,7 +991,7 @@ def test_blank_index_upload_unauthorized(
     arborist_requests_mocker = mock.patch(
         "gen3authz.client.arborist.client.requests.request", new_callable=mock.Mock
     )
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         # pretend arborist says "no"
         arborist_requests.return_value = MockResponse({"auth": False})
         arborist_requests.return_value.status_code = 200
@@ -1070,7 +1071,7 @@ def test_initialize_multipart_upload(
     )
 
     fence.blueprints.data.indexd.BlankIndex.init_multipart_upload = MagicMock()
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         data_requests.post.return_value = MockResponse(
             {
                 "did": str(uuid.uuid4()),
@@ -1126,7 +1127,7 @@ def test_multipart_upload_presigned_url(
     fence.blueprints.data.indexd.BlankIndex.generate_aws_presigned_url_for_part = (
         MagicMock()
     )
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         data_requests.post.return_value = MockResponse(
             {
                 "did": str(uuid.uuid4()),
@@ -1137,7 +1138,7 @@ def test_multipart_upload_presigned_url(
         data_requests.post.return_value.status_code = 200
         arborist_requests.return_value = MockResponse({"auth": True})
         arborist_requests.return_value.status_code = 200
-        fence.blueprints.data.indexd.BlankIndex.generate_aws_presigned_url_for_part.return_value = (
+        fence.blueprints.data.indexd.BlankIndex.generate_aws_presigned_url_for_part.return_value = (  # noqa: E501
             "test_presigned"
         )
         headers = {
@@ -1173,7 +1174,7 @@ def test_multipart_complete_upload(
     )
 
     fence.blueprints.data.indexd.BlankIndex.complete_multipart_upload = MagicMock()
-    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:
+    with data_requests_mocker as data_requests, arborist_requests_mocker as arborist_requests:  # noqa: E501
         data_requests.post.return_value = MockResponse(
             {
                 "did": str(uuid.uuid4()),
@@ -1184,7 +1185,7 @@ def test_multipart_complete_upload(
         data_requests.post.return_value.status_code = 200
         arborist_requests.return_value = MockResponse({"auth": True})
         arborist_requests.return_value.status_code = 200
-        fence.blueprints.data.indexd.BlankIndex.generate_aws_presigned_url_for_part.return_value = (
+        fence.blueprints.data.indexd.BlankIndex.generate_aws_presigned_url_for_part.return_value = (  # noqa: E501
             "test_presigned"
         )
         headers = {

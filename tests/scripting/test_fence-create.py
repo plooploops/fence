@@ -1,17 +1,16 @@
 import time
 import mock
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch  # noqa: F401
 import pytest
 
 import cirrus
-from cirrus.google_cloud.errors import GoogleAuthError
 from userdatamodel.models import Group
 from userdatamodel.driver import SQLAlchemyDriver
 
 from fence.config import config
-from fence.jwt.validate import validate_jwt
-from fence.utils import create_client
+from fence.JWT.validate import validate_jwt
+from fence.utils import create_client  # noqa: F401
 from fence.models import (
     AccessPrivilege,
     Project,
@@ -182,7 +181,7 @@ def test_client_delete(app, db_session, cloud_manager, test_user_a):
 
     # empty return means success
     (
-        cloud_manager.return_value.__enter__.return_value.delete_service_account.return_value
+        cloud_manager.return_value.__enter__.return_value.delete_service_account.return_value  # noqa: E501
     ) = {}
 
     delete_client_action(config["DB"], client_name)
@@ -217,7 +216,7 @@ def test_client_delete_error(app, db_session, cloud_manager, test_user_a):
 
     # error when deleting service account
     (
-        cloud_manager.return_value.__enter__.return_value.delete_service_account.return_value
+        cloud_manager.return_value.__enter__.return_value.delete_service_account.return_value  # noqa: E501
     ) = {"error": "something bad happened"}
 
     delete_client_action(config["DB"], client_name)
@@ -440,7 +439,7 @@ def test_delete_expired_service_accounts_with_one_fail_first(
 
     fence.settings = MagicMock()
     cirrus.config.update = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.side_effect = [
+    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.side_effect = [  # noqa: E501
         HttpError(mock.Mock(status=403), bytes("Permission denied", "utf-8")),
         {},
     ]
@@ -490,7 +489,7 @@ def test_delete_expired_service_accounts_with_one_fail_second(
     import fence
 
     fence.settings = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.side_effect = [
+    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.side_effect = [  # noqa: E501
         {},
         HttpError(mock.Mock(status=403), bytes("Permission denied", "utf-8")),
     ]
@@ -538,7 +537,7 @@ def test_delete_expired_service_accounts(cloud_manager, app, db_session):
     import fence
 
     fence.settings = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.return_value = (
+    cloud_manager.return_value.__enter__.return_value.remove_member_from_group.return_value = (  # noqa: E501
         {}
     )
     _setup_service_account_to_google_bucket_access_group(db_session)
@@ -717,7 +716,7 @@ def test_verify_google_group_member(app, cloud_manager, db_session, setup_test_d
 
     _verify_google_group_member(db_session, access_group, member)
     assert (
-        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called
+        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called  # noqa: E501
     )
 
 
@@ -743,7 +742,7 @@ def test_verify_google_group_member_not_call_delete_operation(
 
     _verify_google_group_member(db_session, access_group, member)
     assert not (
-        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called
+        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called  # noqa: E501
     )
 
 
@@ -769,7 +768,7 @@ def test_verify_google_service_account_member_call_delete_operation(
 
     _verify_google_service_account_member(db_session, access_group, member)
     assert (
-        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called
+        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called  # noqa: E501
     )
 
 
@@ -795,7 +794,7 @@ def test_verify_google_service_account_member_not_call_delete_operation(
 
     _verify_google_service_account_member(db_session, access_group, member)
     assert not (
-        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called
+        cloud_manager.return_value.__enter__.return_value.remove_member_from_group.called  # noqa: E501
     )
 
 
@@ -808,7 +807,7 @@ def test_link_external_bucket(app, cloud_manager, db_session):
     bucket_count_before = db_session.query(Bucket).count()
     gbag_count_before = db_session.query(GoogleBucketAccessGroup).count()
 
-    linked_gbag_email = link_external_bucket(config["DB"], "test_bucket")
+    link_external_bucket(config["DB"], "test_bucket")
 
     bucket_count_after = db_session.query(Bucket).count()
     gbag_count_after = db_session.query(GoogleBucketAccessGroup).count()
@@ -828,7 +827,7 @@ def test_delete_expired_service_account_keys_for_user(
     import fence
 
     fence.settings = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (
+    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (  # noqa: E501
         {}
     )
 
@@ -879,7 +878,7 @@ def test_delete_expired_service_account_keys_for_client(
     import fence
 
     fence.settings = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (
+    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (  # noqa: E501
         {}
     )
 
@@ -937,7 +936,7 @@ def test_delete_expired_service_account_keys_both_user_and_client(
     import fence
 
     fence.settings = MagicMock()
-    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (
+    cloud_manager.return_value.__enter__.return_value.delete_service_account_key.return_value = (  # noqa: E501
         {}
     )
 
@@ -1016,7 +1015,7 @@ def test_modify_client_action(db_session):
         urls=["test"],
     )
     list_client_action(db_session)
-    assert client.auto_approve == True
+    assert client.auto_approve is True
     assert client.name == "test321"
     assert client.description == "test client"
 
@@ -1130,7 +1129,7 @@ def test_modify_client_action_modify_allowed_scopes(db_session):
         allowed_scopes=["openid", "user", "test"],
     )
     list_client_action(db_session)
-    assert client.auto_approve == True
+    assert client.auto_approve is True
     assert client.name == "test321"
     assert client.description == "test client"
     assert client._allowed_scopes == "openid user test"
@@ -1158,7 +1157,7 @@ def test_modify_client_action_modify_allowed_scopes_append_true(db_session):
         allowed_scopes=["new_scope", "new_scope_2", "new_scope_3"],
     )
     list_client_action(db_session)
-    assert client.auto_approve == True
+    assert client.auto_approve is True
     assert client.name == "test321"
     assert client.description == "test client"
     assert (
@@ -1188,7 +1187,7 @@ def test_modify_client_action_modify_append_url(db_session):
         append=True,
     )
     list_client_action(db_session)
-    assert client.auto_approve == True
+    assert client.auto_approve is True
     assert client.name == "test321"
     assert client.description == "test client"
     assert client.redirect_uris == ["abcd", "test1", "test2", "test3"]

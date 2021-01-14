@@ -18,7 +18,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 from fence.models import Client, User, query_for_user
 from fence.errors import NotFound, UserError
 from fence.config import config
-
+import sys
 
 rng = SystemRandom()
 alphanumeric = string.ascii_uppercase + string.ascii_lowercase + string.digits
