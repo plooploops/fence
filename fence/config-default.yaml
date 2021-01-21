@@ -583,7 +583,12 @@ ARBORIST: null
 # Expects a connection string. 
 # See https://docs.microsoft.com/en-gb/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account
 AZ_BLOB_CREDENTIALS: ''
-
+# Use for MSI for storage account.
+# Be sure to grant MSI access to storage account scope
+# For example, you could use 'Contributor' role on the MSI
+# https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-msi
+AZ_BLOB_STORAGE_ACCOUNT_NAME: ''
+AZ_BLOB_STORAGE_ACCOUNT_URL: ''
 
 # //////////////////////////////////////////////////////////////////////////////////////
 # CLOUD API LIBRARY (CIRRUS) AND GOOGLE CONFIGURATION

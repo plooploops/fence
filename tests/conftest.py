@@ -25,7 +25,7 @@ from cryptography.fernet import Fernet
 import bcrypt
 from cdisutilstest.code.storage_client_mock import get_client
 import jwt
-from mock import patch, MagicMock
+from mock import patch, MagicMock, Mock
 from moto import mock_sts
 import pytest
 import requests
@@ -533,9 +533,23 @@ def indexd_client(app, request):
         def from_connection_string(cls, conn_str, credential=None, **kwargs):
             return FakeBlobServiceClient()
 
+        def get_user_delegation_key(self, key_start_time, key_expiry_time):
+            return "FAKE_USER_DELEGATION_KEY"
+
     mock_blob_client_patcher = patch(
         "fence.blueprints.data.indexd.BlobServiceClient",
         return_value=FakeBlobServiceClient(),
+    )
+    mock_managed_identity_credential = patch(
+        "azure.identity.ManagedIdentityCredential", return_value=Mock()
+    )
+    mock_blob_shared_acess_signature = patch(
+        "azure.storage.blob._shared_access_signature.BlobSharedAccessSignature.__init__",  # noqa: E501
+        return_value=None,
+    )
+    mock_blob_shared_acess_signature_generate_blob = patch(
+        "azure.storage.blob._shared_access_signature.BlobSharedAccessSignature.generate_blob",  # noqa: E501
+        return_value="FAKE_SharedAccessSignature_STRING",
     )
     mock_generate_blob_sas_patcher = patch(
         "fence.blueprints.data.indexd.generate_blob_sas",
@@ -552,6 +566,9 @@ def indexd_client(app, request):
     mocker.add_mock(indexd_patcher)
     mocker.add_mock(blank_patcher)
     mocker.add_mock(mock_blob_client_patcher)
+    mocker.add_mock(mock_managed_identity_credential)
+    mocker.add_mock(mock_blob_shared_acess_signature)
+    mocker.add_mock(mock_blob_shared_acess_signature_generate_blob)
     mocker.add_mock(mock_generate_blob_sas_patcher)
 
     output = {

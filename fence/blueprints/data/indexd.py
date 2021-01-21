@@ -11,7 +11,9 @@ from cdispyutils.hmac4 import generate_aws_presigned_url
 import flask
 import requests
 from datetime import datetime, timedelta
-from azure.storage.blob import (
+from azure.identity import ManagedIdentityCredential
+from azure.storage.blob._shared_access_signature import BlobSharedAccessSignature
+from azure.storage.blob import (  # noqa: F401
     BlobServiceClient,
     ResourceTypes,
     AccountSasPermissions,
@@ -970,37 +972,67 @@ class GoogleStorageIndexedFileLocation(IndexedFileLocation):
 
 class AzureBlobStorageIndexedFileLocation(IndexedFileLocation):
     """
-    An indexed file that lives in a Azure blob storage conatiner.
+    An indexed file that lives in a Azure blob storage container.
     """
 
-    def _create_sas_query(
-        self, conn_str, container_name, blob_name, expires_in_seconds
+    def _create_sas_query_with_msi(
+        self, container_name, blob_name, account_name, account_url, expires_in_seconds
     ):
-        blob_service_client = BlobServiceClient.from_connection_string(conn_str)
-
-        sas_query = generate_blob_sas(
-            blob_service_client.account_name,
-            container_name,
-            blob_name,
-            account_key=blob_service_client.credential.account_key,
-            resource_types=ResourceTypes(object=True),
-            permission=AccountSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(seconds=expires_in_seconds),
+        # MSI must be granted 'contributor' role to storage account scope
+        credential = ManagedIdentityCredential()
+        # account_name = "mysa12345"
+        # account_url = "https://mysa12345.blob.core.windows.net/"
+        # expires_in_seconds = 200
+        blob_service_client = BlobServiceClient(
+            account_url=account_url, credential=credential
         )
-        return sas_query
+        key_start_time = datetime.utcnow()
+        key_expiry_time = key_start_time + timedelta(seconds=expires_in_seconds)
+        user_delegation_key = blob_service_client.get_user_delegation_key(
+            key_start_time=key_start_time, key_expiry_time=key_expiry_time
+        )
+        blob_sas = BlobSharedAccessSignature(
+            account_name=account_name, user_delegation_key=user_delegation_key
+        )
+        sas_query_string = blob_sas.generate_blob(
+            container_name=container_name, blob_name=blob_name
+        )
+
+        return sas_query_string
+
+    # def _create_sas_query(
+    #     self, conn_str, container_name, blob_name, expires_in_seconds
+    # ):
+    #     blob_service_client = BlobServiceClient.from_connection_string(conn_str)
+
+    #     sas_query = generate_blob_sas(
+    #         blob_service_client.account_name,
+    #         container_name,
+    #         blob_name,
+    #         account_key=blob_service_client.credential.account_key,
+    #         resource_types=ResourceTypes(object=True),
+    #         permission=AccountSasPermissions(read=True),
+    #         expiry=datetime.utcnow() + timedelta(seconds=expires_in_seconds),
+    #     )
+    #     return sas_query
 
     def _generate_azure_blob_storage_sas(
         self,
         http_verb,
         container_and_blob,
         expires_in,
-        azure_creds,
+        account_name,
+        account_url,
         user_id,
         username,
         r_pays_project=None,
     ):
-        sas_query = self._create_sas_query(
-            azure_creds, container_and_blob[0], container_and_blob[1], expires_in
+        sas_query = self._create_sas_query_with_msi(
+            container_and_blob[0],
+            container_and_blob[1],
+            account_name,
+            account_url,
+            expires_in,
         )
         sas_url = self.url + "?" + sas_query
         return sas_url
@@ -1013,10 +1045,22 @@ class AzureBlobStorageIndexedFileLocation(IndexedFileLocation):
         force_signed_url=True,
         r_pays_project=None,
     ):
-        azure_creds = get_value(
+        # azure_creds = get_value(
+        #     config,
+        #     "AZ_BLOB_CREDENTIALS",
+        #     InternalError("Azure Blob credentials not configured"),
+        # )
+
+        azure_blob_storage_account_name = get_value(
             config,
-            "AZ_BLOB_CREDENTIALS",
-            InternalError("Azure Blob credentials not configured"),
+            "AZ_BLOB_STORAGE_ACCOUNT_NAME",
+            InternalError("Azure Blob Storage Account Name not configured"),
+        )
+
+        azure_blob_storage_account_url = get_value(
+            config,
+            "AZ_BLOB_STORAGE_ACCOUNT_URL",
+            InternalError("Azure Blob Storage Account URL not configured"),
         )
 
         container_and_blob = self.parsed_url.path.strip("/").split("/")
@@ -1026,7 +1070,8 @@ class AzureBlobStorageIndexedFileLocation(IndexedFileLocation):
             ACTION_DICT["az"][action],
             container_and_blob,
             expires_in,
-            azure_creds,
+            azure_blob_storage_account_name,
+            azure_blob_storage_account_url,
             user_info.get("user_id"),
             user_info.get("username"),
             r_pays_project=r_pays_project,
