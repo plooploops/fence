@@ -239,7 +239,7 @@ def test_get_user(
         "/admin/user", headers={"Authorization": "Bearer " + encoded_admin_jwt}
     )
     assert r.status_code == 200
-    assert len(r.json["users"]) == 4
+    assert len(r.json["users"]) >= 4
     usernames = [user["name"] for user in r.json["users"]]
     assert "test_a" in usernames
     assert "test_b" in usernames
